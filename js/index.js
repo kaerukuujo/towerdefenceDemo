@@ -7,55 +7,69 @@ canvas.height = 768;
 c.fillStyle = 'white';
 c.fillRect(0, 0, canvas.width, canvas.height);
 
+const placementTilesData2D = [];
+
+for(let i = 0; i < placementTilesData.length; i += 20) {
+    placementTilesData2D.push(placementTilesData.slice(i, i + 20));
+};
+
+const placementTiles = [];
+
+placementTilesData2D.forEach((row, y) => {
+    row.forEach((symbol, x) => {
+        if(symbol === 14) {
+            //add building placement tile here 
+            placementTiles.push(new PlacementTile({
+                position: {
+                    x: x * 64,
+                    y: y * 64
+                }
+            }))
+        }
+    })
+})
+
+console.log(placementTiles);
+
 const image = new Image();
 image.onload = () => {
         
 }
 image.src = './img/gameMap.png';
 
-class Enemy {
-    constructor( {position = { x: 0, y: 0 }} ) {
-        this.position = position;
-        this.width = 100;
-        this.height = 100;
-        this.waypointIndex = 0;
-    }
+const enemies = [];
 
-    draw() {
-        c.fillStyle = 'red';
-        c.fillRect(this.position.x, this.position.y, this.width, this.height);
-    }
-
-    update() {
-        this.draw();       
-
-        const waypoint = waypoints[this.waypointIndex];
-        const yDistance = waypoint.y - this.position.y;
-        const xDistance = waypoint.x - this.position.x;
-        const angle = Math.atan2(yDistance, xDistance);
-        this.position.x += Math.cos(angle);
-        this.position.y += Math.sin(angle);
-
-        console.log(Math.round(this.position.x));
-
-        if(
-            Math.round(this.position.x) === Math.round(waypoint.x) && 
-            Math.round(this.position.y) === Math.round(waypoint.y)
-        ) {
-            this.waypointIndex++;
-        };
-    }
+for(let i = 1; i < 10; i++){
+    const xOffset = i * 150;
+    enemies.push(
+      new Enemy({
+        position: { x: waypoints[0].x - xOffset, y: waypoints[0].y }
+    }))
 }
 
-const enemy = new Enemy({position: { x: 200, y: 400 }});
-const enemy2 = new Enemy({position: { x: 0, y: 400 }});
+const buildings = [];
 
 function animate(){
     requestAnimationFrame(animate);
 
     c.drawImage(image, 0, 0);
-    enemy.update();
-    enemy2.update();
+    enemies.forEach(enemy => {
+        enemy.update();
+    })
+
+    placementTiles.forEach(tile => {
+        tile.update(mouse);
+    })
 }
+
+const mouse = {
+    x: undefined,
+    y: undefined
+} ;
+
+window.addEventListener('mousemove', (event) => {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+})
 
 animate();
